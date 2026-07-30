@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}{{ student.name }} - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <div class="d-flex align-items-center gap-3">
+    {% if student.photo_filename %}
+    <img class="student-avatar" src="{{ url_for('student_photo', filename=student.photo_filename) }}" alt="{{ student.name }} photo" />
+    {% else %}
+    <div class="student-avatar-placeholder">{{ (student.name or 'U')[0]|upper }}</div>
+    {% endif %}
+    <div>
+      <h3 class="section-title mb-0">{{ student.name }}
+        <span class="badge {{ 'badge-active' if student.status=='Active' else ('badge-completed' if student.status=='Completed' else 'badge-dropped') }}">{{ student.status }}</span>
+      </h3>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('student_edit', sid=student.id) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i> Edit</a>
+    <a href="{{ url_for('certificate_page', sid=student.id) }}" class="btn btn-gold btn-sm"><i class="bi bi-award"></i> Generate Certificate</a>
+    <form method="post" action="{{ url_for('student_delete', sid=student.id) }}"
+          onsubmit="return confirm('Delete this student record permanently? This also removes their attendance and fee history.');" class="d-inline">
+      <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-6">
+    <div class="card p-3 h-100">
+      <h6 class="text-uppercase text-muted">Details</h6>
+      <table class="table table-sm mb-0">
+        <tr><th style="width:40%">Course</th><td>{{ student.course }} ({{ student.batch }} batch)</td></tr>
+        <tr><th>Duration</th><td>{{ student.duration_months }} months</td></tr>
+        <tr><th>Admission Date</th><td>{{ student.admission_date | ddmmyyyy }}</td></tr>
+        <tr><th>Start Date</th><td>{{ student.start_date | ddmmyyyy }}</td></tr>
+        <tr><th>End Date</th><td>{{ student.end_date | ddmmyyyy }}</td></tr>
+        <tr><th>Mobile</th><td>{{ student.mobile }}{% if student.alt_mobile %} / {{ student.alt_mobile }}{% endif %}</td></tr>
+        <tr><th>Address</th><td>{{ student.address }}</td></tr>
+        <tr><th>Father's/Husband's Name</th><td>{{ student.father_husband_name }}</td></tr>
+        <tr><th>Emergency Contact</th><td>{{ student.emergency_name }} ({{ student.emergency_relation }}) - {{ student.emergency_mobile }}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card p-3 h-100">
+      <h6 class="text-uppercase text-muted">Fee Summary</h6>
+      <div class="row text-center g-2 mb-3">
+        <div class="col-4">
+          <div class="fw-bold fs-5">₹{{ '%.0f'|format(due) }}</div>
+          <div class="text-muted small">Total Due</div>
+        </div>
+        <div class="col-4">
+          <div class="fw-bold fs-5 text-success">₹{{ '%.0f'|format(paid) }}</div>
+          <div class="text-muted small">Paid</div>
+        </div>
+        <div class="col-4">
+          <div class="fw-bold fs-5 {{ 'text-danger' if balance > 0 else 'text-success' }}">₹{{ '%.0f'|format(balance) }}</div>
+          <div class="text-muted small">Balance</div>
+        </div>
+      </div>
+      <h6 class="text-uppercase text-muted">Attendance Summary</h6>
+      <div class="row text-center g-2">
+        <div class="col-6">
+          <div class="fw-bold fs-5 text-success">{{ present_count }}</div>
+          <div class="text-muted small">Present</div>
+        </div>
+        <div class="col-6">
+          <div class="fw-bold fs-5 text-danger">{{ absent_count }}</div>
+          <div class="text-muted small">Absent</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h6 class="text-uppercase text-muted">Fee Payment History</h6>
+      <div class="table-responsive" style="max-height: 320px; overflow:auto;">
+      <table class="table table-sm">
+        <thead><tr><th>Month</th><th>Amount</th><th>Date</th><th>Mode</th></tr></thead>
+        <tbody>
+          {% for f in fees %}
+          <tr><td>{{ f.month }}</td><td>₹{{ '%.0f'|format(f.amount_paid) }}</td>
+              <td>{{ f.payment_date | ddmmyyyy }}</td><td>{{ f.mode }}</td></tr>
+          {% else %}
+          <tr><td colspan="4" class="text-muted text-center">No payments recorded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      <a href="{{ url_for('fees_page') }}" class="btn btn-sm btn-outline-primary mt-2">Record Payment</a>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h6 class="text-uppercase text-muted">Recent Attendance</h6>
+      <div class="table-responsive" style="max-height: 320px; overflow:auto;">
+      <table class="table table-sm">
+        <thead><tr><th>Date</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for a in attendance[:20] %}
+          <tr><td>{{ a.date | ddmmyyyy }}</td>
+              <td><span class="badge {{ 'bg-success' if a.status=='Present' else 'bg-danger' }}">{{ a.status }}</span></td></tr>
+          {% else %}
+          <tr><td colspan="2" class="text-muted text-center">No attendance recorded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      <a href="{{ url_for('attendance_history', student_id=student.id) }}" class="btn btn-sm btn-outline-primary mt-2">Full Attendance History</a>
+    </div>
+  </div>
+</div>
+
+{% if certs %}
+<div class="card p-3 mt-3">
+  <h6 class="text-uppercase text-muted">Certificates Issued</h6>
+  <table class="table table-sm mb-0">
+    <thead><tr><th>Duration</th><th>Period</th><th>Issued On</th><th></th></tr></thead>
+    <tbody>
+    {% for c in certs %}
+      <tr><td>{{ c.duration_months }} months</td>
+          <td>{{ c.start_date | ddmmyyyy }} - {{ c.end_date | ddmmyyyy }}</td>
+          <td>{{ c.issued_on }}</td>
+          <td><a href="{{ url_for('download_certificate', sid=student.id, cert_id=c.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i> Download</a></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}

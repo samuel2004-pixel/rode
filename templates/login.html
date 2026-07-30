@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Sign in - YWAM Tailoring Centre{% endblock %}
+
+{% block auth_content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-inner">
+      <div class="auth-brand">
+        <div class="brand glyph-anim">
+          <img class="brand-img brand-lg" src="{{ url_for('static', filename='logo.png') }}" alt="YWAM Tailoring Centre logo" />
+        </div>
+        <div>
+          <h1 class="h3 mb-0 fw-bold">YWAM Tailoring Centre</h1>
+          <p class="muted">Management System</p>
+        </div>
+      </div>
+
+      <form method="post" class="mt-3" autocomplete="on">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="username" name="username" placeholder="Username" value="{{ request.form.get('username','') }}" required />
+          <label for="username"><i class="bi bi-person"></i> Username</label>
+        </div>
+        <div class="form-floating mb-3 mb-3">
+          <input type="password" class="form-control" id="password" name="password" placeholder="Password" required />
+          <label for="password"><i class="bi bi-key"></i> Password</label>
+        </div>
+
+        <div class="d-flex justify-content-end align-items-center mb-4">
+          <div class="remember">
+            <input class="form-check-input" type="checkbox" checked="checked" id="remember" />
+            <label class="form-check-label small muted" for="remember">Remember me</label>
+          </div>
+        </div>
+
+        <button class="btn btn-login w-100" type="submit" id="loginBtn">
+          <span class="btn-text">Sign in</span>
+          <span class="btn-loader" aria-hidden="true"></span>
+        </button>
+      </form>
+    </div>
+
+    <div class="auth-illustration d-none d-md-flex">
+      <img class="auth-illustration-img" src="{{ url_for('static', filename='login-illustration.jpg') }}" alt="Tailoring illustration" />
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block auth_scripts %}
+<script>
+  const loginBtn = document.getElementById('loginBtn');
+  const form = loginBtn && loginBtn.closest('form');
+  if (form) {
+    form.addEventListener('submit', () => {
+      loginBtn.classList.add('loading');
+    });
+  }
+</script>
+{% endblock %}

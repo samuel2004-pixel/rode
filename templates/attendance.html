@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block title %}Attendance - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h3 class="section-title mb-0">Mark Attendance</h3>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('device_users_list') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-fingerprint"></i> Link Biometric IDs</a>
+    <a href="{{ url_for('attendance_history') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-clock-history"></i> View History / Export</a>
+  </div>
+</div>
+
+<div class="card p-3 mb-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-auto">
+      <a class="btn btn-outline-secondary" href="{{ url_for('attendance_page', month=prev_mon, year=prev_year) }}"><i class="bi bi-chevron-left"></i></a>
+    </div>
+    <div class="col-md-3">
+      <form method="get" id="monthYearForm" class="row g-2">
+        <div class="col-7">
+          <label class="form-label mb-1">Month</label>
+          <select class="form-select" name="month" onchange="document.getElementById('monthYearForm').submit()">
+            {% for m in range(1, 13) %}
+            <option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ month_names[m-1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-5">
+          <label class="form-label mb-1">Year</label>
+          <input type="number" class="form-control" name="year" value="{{ year }}" min="2000" max="2100" onchange="document.getElementById('monthYearForm').submit()">
+        </div>
+      </form>
+    </div>
+    <div class="col-auto">
+      <a class="btn btn-outline-secondary" href="{{ url_for('attendance_page', month=next_mon, year=next_year) }}"><i class="bi bi-chevron-right"></i></a>
+    </div>
+
+    <div class="col-md-5 ms-auto">
+      <form method="post" action="{{ url_for('attendance_sync') }}" class="row g-2 align-items-end justify-content-end">
+        <div class="col-auto">
+          <label class="form-label mb-1">Sync biometric for</label>
+          <input type="date" class="form-control" name="date" value="{{ sync_date }}">
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-gold"><i class="bi bi-fingerprint"></i> Sync</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<form method="post" id="regForm">
+<input type="hidden" name="month" value="{{ month }}">
+<input type="hidden" name="year" value="{{ year }}">
+
+<div class="card p-2 reg-card">
+<div class="table-responsive">
+<table class="table table-bordered table-sm align-middle mb-0 reg-table">
+  <caption class="reg-caption text-center"> Attendance for the Month of {{ month_label }}</caption>
+  <thead>
+    <tr class="reg-head">
+      <th class="reg-sticky reg-col-no">Sl.No</th>
+      <th class="reg-sticky reg-col-name">Name</th>
+      <th>Designation</th>
+      {% for d in range(1, days_in_month + 1) %}
+      <th class="reg-day-head {% if d == today_day %}reg-today-col{% endif %}">{{ d }}</th>
+      {% endfor %}
+      <th>No. of<br>days<br>worked</th>
+      <th>No. of<br>days<br>leave</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in students %}
+    <tr>
+      <td class="reg-sticky reg-col-no">{{ loop.index }}</td>
+      <td class="reg-sticky reg-col-name text-start">
+        <div class="d-flex align-items-center gap-2">
+          {% if s.photo_filename %}
+          <img class="student-avatar" src="{{ url_for('student_photo', filename=s.photo_filename) }}" alt="{{ s.name }}" />
+          {% else %}
+          <div class="student-avatar-placeholder">{{ (s.name or 'U')[0]|upper }}</div>
+          {% endif %}
+          <span>{{ s.name }}</span>
+        </div>
+      </td>
+      <td>{{ s.course }}</td>
+      {% for d in range(1, days_in_month + 1) %}
+      {% set st = marks.get((s.id, d)) %}
+      {% set src = sources.get((s.id, d)) %}
+      <td class="reg-cell {% if st == 'Present' %}reg-present{% elif st == 'Absent' %}reg-absent{% else %}reg-blank{% endif %} {% if d == today_day %}reg-today-col{% endif %}"
+          data-sid="{{ s.id }}"
+          onclick="cycleMark(this, {{ s.id }}, {{ d }})"
+          {% if src == 'Biometric' %}title="Synced from biometric device"{% endif %}>
+        <span class="reg-cell-label">{% if st == 'Present' %}P{% elif st == 'Absent' %}A{% endif %}</span>
+        <input type="hidden" id="mk_{{ s.id }}_{{ d }}" name="mark_{{ s.id }}_{{ d }}" value="{{ st or '' }}">
+        <input type="hidden" id="tc_{{ s.id }}_{{ d }}" name="touched_{{ s.id }}_{{ d }}" value="">
+      </td>
+      {% endfor %}
+      <td class="reg-total" id="worked_{{ s.id }}">{{ totals[s.id].worked }}</td>
+      <td class="reg-total" id="leave_{{ s.id }}">{{ totals[s.id].leave }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="{{ days_in_month + 5 }}" class="text-center text-muted py-4">No active students to mark attendance for.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+
+<div class="d-flex align-items-center gap-3 mt-3 flex-wrap">
+  {% if students %}
+  <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Save Attendance for {{ month_label }}</button>
+  {% endif %}
+  <small class="text-muted">
+    Click a day cell to cycle <strong class="reg-present-ink">P</strong> (Present) → <strong class="reg-absent-ink">A</strong> (Absent) → blank.
+    Cells outlined in blue were synced from the biometric device.
+  </small>
+</div>
+</form>
+
+<style>
+.reg-card { overflow: hidden; }
+.reg-caption {
+  caption-side: top;
+  font-weight: 700;
+  color: #7a1f3d;
+  padding: .6rem 0 .3rem;
+  font-size: 1.05rem;
+}
+.reg-table { font-size: .78rem; border-collapse: collapse; }
+.reg-table th, .reg-table td { padding: .3rem .35rem; text-align: center; vertical-align: middle; }
+.reg-head th {
+  background: #f4b8c1;
+  color: #7a1f3d;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.reg-day-head { min-width: 26px; }
+.reg-sticky { position: sticky; background: #fff; z-index: 2; }
+.reg-col-no { left: 0; min-width: 40px; }
+.reg-col-name { left: 40px; min-width: 170px; text-align: left !important; box-shadow: 2px 0 4px rgba(0,0,0,.05); }
+thead .reg-sticky { z-index: 3; }
+.reg-cell {
+  cursor: pointer;
+  user-select: none;
+  min-width: 26px;
+  font-weight: 700;
+  transition: background .15s ease;
+}
+.reg-cell:hover { background: #fff7ed; }
+.reg-blank .reg-cell-label { color: transparent; }
+.reg-present { background: #e8f5e9; }
+.reg-present .reg-cell-label { color: #2e7d32; }
+.reg-absent { background: #fdecea; }
+.reg-absent .reg-cell-label { color: #c62828; }
+.reg-today-col { background-color: #fff3cd !important; }
+.reg-total { font-weight: 700; background: #f3f3e6; }
+.reg-present-ink { color: #2e7d32; }
+.reg-absent-ink { color: #c62828; }
+tbody tr:nth-child(even) td:not(.reg-cell):not(.reg-sticky):not(.reg-total) { background: #fafaf5; }
+</style>
+
+<script>
+function cycleMark(cell, sid, day) {
+  var input = document.getElementById('mk_' + sid + '_' + day);
+  var touched = document.getElementById('tc_' + sid + '_' + day);
+  var cur = input.value;
+  var next = cur === '' ? 'Present' : (cur === 'Present' ? 'Absent' : '');
+  input.value = next;
+  touched.value = '1';
+
+  cell.classList.remove('reg-present', 'reg-absent', 'reg-blank');
+  var label = cell.querySelector('.reg-cell-label');
+  if (next === 'Present') {
+    cell.classList.add('reg-present');
+    label.textContent = 'P';
+  } else if (next === 'Absent') {
+    cell.classList.add('reg-absent');
+    label.textContent = 'A';
+  } else {
+    cell.classList.add('reg-blank');
+    label.textContent = '';
+  }
+  updateRowTotals(sid);
+}
+
+function updateRowTotals(sid) {
+  var cells = document.querySelectorAll('.reg-cell[data-sid="' + sid + '"]');
+  var worked = 0, leave = 0;
+  cells.forEach(function (c) {
+    if (c.classList.contains('reg-present')) worked++;
+    if (c.classList.contains('reg-absent')) leave++;
+  });
+  document.getElementById('worked_' + sid).textContent = worked;
+  document.getElementById('leave_' + sid).textContent = leave;
+}
+</script>
+
+{% endblock %}

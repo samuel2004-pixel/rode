@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Students - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h3 class="section-title mb-0">Students</h3>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{{ url_for('export_students_csv') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-filetype-csv"></i> Export CSV</a>
+    <a href="{{ url_for('export_students_pdf') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-filetype-pdf"></i> Export PDF</a>
+    <a href="{{ url_for('student_add') }}" class="btn btn-primary btn-sm"><i class="bi bi-person-plus"></i> Register Student</a>
+  </div>
+</div>
+
+<div class="card p-3 mb-3">
+  <h6 class="text-uppercase text-muted mb-2">Search Students</h6>
+  <form class="row g-2" method="get">
+    <div class="col-12 col-md-5">
+      <label class="form-label mb-1">Name or mobile</label>
+      <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="Search by name or mobile number">
+    </div>
+    <div class="col-8 col-md-4">
+      <label class="form-label mb-1">Status</label>
+      <select class="form-select" name="status">
+        <option value="">All Statuses</option>
+        {% for st in statuses %}
+        <option value="{{ st }}" {% if status==st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-4 col-md-3 d-flex align-items-end">
+      <button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-search"></i> Filter</button>
+    </div>
+  </form>
+</div>
+
+<div class="card p-2">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <thead>
+      <tr><th>Name</th><th>Course</th><th>Batch</th><th>Mobile</th>
+        <th>Start Date</th><th>End Date</th><th>Status</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in students %}
+      <tr>
+        <td>
+          {% if s.photo_filename %}
+          <img class="student-avatar" src="{{ url_for('student_photo', filename=s.photo_filename) }}" alt="{{ s.name }}" />
+          {% else %}
+          <div class="student-avatar-placeholder">{{ (s.name or 'U')[0]|upper }}</div>
+          {% endif %}
+          <a href="{{ url_for('student_view', sid=s.id) }}">{{ s.name }}</a>
+        </td>
+      <td>{{ s.course }}</td>
+      <td>{{ s.batch }}</td>
+      <td>{{ s.mobile }}</td>
+      <td>{{ s.start_date | ddmmyyyy }}</td>
+      <td>{{ s.end_date | ddmmyyyy }}</td>
+      <td>
+        <span class="badge {{ 'badge-active' if s.status=='Active' else ('badge-completed' if s.status=='Completed' else 'badge-dropped') }}">{{ s.status }}</span>
+      </td>
+      <td class="text-nowrap">
+        <a href="{{ url_for('student_view', sid=s.id) }}" class="btn btn-sm btn-outline-secondary" title="View"><i class="bi bi-eye"></i></a>
+        <a href="{{ url_for('student_edit', sid=s.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+        <a href="{{ url_for('certificate_page', sid=s.id) }}" class="btn btn-sm btn-outline-secondary" title="Certificate"><i class="bi bi-award"></i></a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9" class="text-center text-muted py-4">No students found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+
+{% endblock %}

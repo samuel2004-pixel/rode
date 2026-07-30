@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Link Biometric IDs - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h3 class="section-title mb-0">Link Biometric IDs to Students</h3>
+  <a href="{{ url_for('device_settings') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-gear"></i> Device Settings</a>
+</div>
+
+{% if error %}
+<div class="alert alert-warning">{{ error }}</div>
+{% endif %}
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h6 class="text-uppercase text-muted">Users Enrolled on Device</h6>
+      {% if device_users %}
+      <table class="table table-sm">
+        <thead><tr><th>Device ID</th><th>Name on Device</th><th>Linked To</th></tr></thead>
+        <tbody>
+          {% for u in device_users %}
+          <tr>
+            <td>{{ u.device_user_id }}</td>
+            <td>{{ u.name }}</td>
+            <td>
+              {% if mapped.get(u.device_user_id) %}
+                <span class="badge bg-success">{{ mapped.get(u.device_user_id) }}</span>
+              {% else %}
+                <span class="badge bg-secondary">Not linked</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-muted mb-0">No device users could be read. Check your device settings and connection.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h6 class="text-uppercase text-muted">Set Each Student's Device ID</h6>
+      <p class="small text-muted">Match the Device ID shown on the left to each student below, then save.</p>
+      <form method="post" action="{{ url_for('save_device_links') }}">
+        <div class="table-responsive" style="max-height: 420px; overflow:auto;">
+        <table class="table table-sm align-middle">
+          <thead><tr><th>Student</th><th>Device ID</th></tr></thead>
+          <tbody>
+            {% for s in students %}
+            <tr>
+              <td>{{ s.name }}</td>
+              <td>
+                <input type="text" class="form-control form-control-sm"
+                       name="device_id_{{ s.id }}" value="{{ s.device_user_id or '' }}"
+                       placeholder="e.g. 7">
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2"><i class="bi bi-check-circle"></i> Save Links</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

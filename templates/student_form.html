@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if student else 'Register' }} Student - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+
+<h3 class="section-title">{{ 'Edit Student' if student else 'New Student Registration' }}</h3>
+
+<form method="post" class="card p-4" enctype="multipart/form-data">
+
+  <h6 class="text-uppercase text-muted mb-3">Training Details</h6>
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      <label class="form-label">Course Applied For *</label>
+      <select class="form-select" name="course" required>
+        <option value="">Select course</option>
+        {% for c in courses %}
+        <option value="{{ c }}" {% if student and student.course==c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Batch Preferred</label>
+      <select class="form-select" name="batch">
+        <option value="">Select batch</option>
+        {% for b in batches %}
+        <option value="{{ b }}" {% if student and student.batch==b %}selected{% endif %}>{{ b }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Status</label>
+      <select class="form-select" name="status">
+        {% for st in statuses %}
+        <option value="{{ st }}" {% if student and student.status==st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <h6 class="text-uppercase text-muted mb-3">Personal Details</h6>
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      <label class="form-label">Name of Applicant *</label>
+      <input type="text" class="form-control" name="name" required
+             value="{{ student.name if student else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Date of Birth</label>
+      <input type="date" class="form-control" name="dob"
+             value="{{ student.dob if student else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Age</label>
+      <input type="number" class="form-control" name="age"
+             value="{{ student.age if student else '' }}">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Gender</label>
+      <select class="form-select" name="gender">
+        <option value="">Select</option>
+        {% for g in ['Male','Female','Other'] %}
+        <option value="{{ g }}" {% if student and student.gender==g %}selected{% endif %}>{{ g }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Marital Status</label>
+      <select class="form-select" name="marital_status">
+        <option value="">Select</option>
+        {% for m in ['Married','Unmarried'] %}
+        <option value="{{ m }}" {% if student and student.marital_status==m %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Father's / Husband's Name</label>
+      <input type="text" class="form-control" name="father_husband_name"
+             value="{{ student.father_husband_name if student else '' }}">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Mother's Name</label>
+      <input type="text" class="form-control" name="mother_name"
+             value="{{ student.mother_name if student else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Educational Qualification</label>
+      <input type="text" class="form-control" name="education"
+             value="{{ student.education if student else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Occupation</label>
+      <input type="text" class="form-control" name="occupation"
+             value="{{ student.occupation if student else '' }}">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Employment Status</label>
+      <select class="form-select" name="employment_status">
+        <option value="">Select</option>
+        {% for e in ['Employed','Unemployed'] %}
+        <option value="{{ e }}" {% if student and student.employment_status==e %}selected{% endif %}>{{ e }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Community</label>
+      <select class="form-select" name="community">
+        <option value="">Select</option>
+        {% for c in ['BC','MBC','SC','ST','FC','OBC','Others'] %}
+        <option value="{{ c }}" {% if student and student.community==c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Religion</label>
+      <input type="text" class="form-control" name="religion"
+             value="{{ student.religion if student else '' }}">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Family Monthly Income (₹)</label>
+      <input type="text" class="form-control" name="family_income"
+             value="{{ student.family_income if student else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Any Special Skill</label>
+      <input type="text" class="form-control" name="special_skill"
+             value="{{ student.special_skill if student else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Previous Tailoring Experience</label>
+      <input type="text" class="form-control" name="prev_experience"
+             placeholder="No, or specify details"
+             value="{{ student.prev_experience if student else '' }}">
+    </div>
+  </div>
+
+  <h6 class="text-uppercase text-muted mb-3">Contact Details</h6>
+  <div class="row g-3 mb-3">
+    <div class="col-md-8">
+      <label class="form-label">Full Address</label>
+      <textarea class="form-control" name="address" rows="2">{{ student.address if student else '' }}</textarea>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Mobile Number *</label>
+      <input type="text" class="form-control" name="mobile" required
+             value="{{ student.mobile if student else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Alternate Mobile</label>
+      <input type="text" class="form-control" name="alt_mobile"
+             value="{{ student.alt_mobile if student else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">E-mail</label>
+      <input type="email" class="form-control" name="email"
+             value="{{ student.email if student else '' }}">
+    </div>
+  </div>
+
+  <h6 class="text-uppercase text-muted mb-3">Emergency Contact</h6>
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      <label class="form-label">Name</label>
+      <input type="text" class="form-control" name="emergency_name"
+             value="{{ student.emergency_name if student else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Relationship</label>
+      <input type="text" class="form-control" name="emergency_relation"
+             value="{{ student.emergency_relation if student else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Mobile Number</label>
+      <input type="text" class="form-control" name="emergency_mobile"
+             value="{{ student.emergency_mobile if student else '' }}">
+    </div>
+  </div>
+
+  <h6 class="text-uppercase text-muted mb-3">Course Duration &amp; Fees</h6>
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <label class="form-label">Admission Date</label>
+      <input type="date" class="form-control" name="admission_date"
+             value="{{ student.admission_date if student else '' }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Course Start Date</label>
+      <input type="date" class="form-control" name="start_date"
+             value="{{ student.start_date if student else '' }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Course End Date</label>
+      <input type="date" class="form-control" name="end_date"
+             value="{{ student.end_date if student else '' }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Duration</label>
+      <select class="form-select" name="duration_months">
+        <option value="3" {% if student and student.duration_months==3 %}selected{% endif %}>3 months</option>
+        <option value="6" {% if student and student.duration_months==6 %}selected{% endif %}>6 months</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Monthly Fee (₹)</label>
+      <input type="number" step="0.01" class="form-control" name="monthly_fee"
+             value="{{ student.monthly_fee if student else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Photograph</label>
+      <input class="form-control" type="file" name="photo" accept="image/*" id="photoInput" />
+      {% if student and student.photo_filename %}
+      <img class="student-avatar-preview mt-2" src="{{ url_for('student_photo', filename=student.photo_filename) }}" alt="Student photo" />
+      <div class="form-check mt-2">
+        <input class="form-check-input" type="checkbox" name="remove_photo" id="removePhoto" />
+        <label class="form-check-label small" for="removePhoto">Remove photo</label>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Biometric Device ID</label>
+      <input type="text" class="form-control" name="device_user_id"
+             placeholder="e.g. 7"
+             value="{{ student.device_user_id if student else '' }}">
+      <div class="form-text">The ID this student was enrolled with on the fingerprint device (optional).</div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Save Student</button>
+    <a href="{{ url_for('students_list') }}" class="btn btn-outline-secondary">Cancel</a>
+  </div>
+</form>
+
+{% endblock %}

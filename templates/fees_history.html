@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Fees History - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h3 class="section-title mb-0">Fees History</h3>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{{ url_for('export_fees_csv', student_id=student_id, month=month) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-filetype-csv"></i> Export CSV</a>
+    <a href="{{ url_for('export_fees_pdf', student_id=student_id, month=month) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-filetype-pdf"></i> Export PDF</a>
+  </div>
+</div>
+
+<div class="card p-3 mb-3">
+  <h6 class="text-uppercase text-muted mb-2">Search Records</h6>
+  <form class="row g-2" method="get">
+    <div class="col-12 col-sm-6 col-md-4">
+      <label class="form-label mb-1">Student</label>
+      <select class="form-select" name="student_id">
+        <option value="">All Students</option>
+        {% for s in students %}
+        <option value="{{ s.id }}" {% if student_id|string == s.id|string %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4">
+      <label class="form-label mb-1">Month</label>
+      <input type="month" class="form-control" name="month" value="{{ month }}">
+    </div>
+    <div class="col-12 col-md-3 d-flex align-items-end">
+      <button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-search"></i> Filter</button>
+    </div>
+  </form>
+</div>
+
+<div class="card p-2">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Month</th><th>Student</th><th>Amount Paid</th><th>Payment Date</th><th>Mode</th><th>Remarks</th></tr></thead>
+  <tbody>
+    {% for r in records %}
+    <tr>
+      <td>{{ r.month }}</td>
+      <td>{{ r.student_name }}</td>
+      <td>₹{{ '%.0f'|format(r.amount_paid) }}</td>
+      <td>{{ r.payment_date | ddmmyyyy }}</td>
+      <td>{{ r.mode }}</td>
+      <td>{{ r.remarks }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="text-center text-muted py-4">No fee records found.</td></tr>
+    {% endfor %}
+  </tbody>
+  {% if records %}
+  <tfoot>
+    <tr class="fw-bold"><td colspan="2">Total</td><td>₹{{ '%.0f'|format(total) }}</td><td colspan="3"></td></tr>
+  </tfoot>
+  {% endif %}
+</table>
+</div>
+</div>
+
+{% endblock %}

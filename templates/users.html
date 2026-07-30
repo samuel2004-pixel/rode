@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}User Management - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+<h3 class="section-title">User Management</h3>
+
+<div class="card p-3 mb-3 fade-up">
+  <h5 class="mb-3 fw-semibold"><i class="bi bi-person-plus"></i> Add New User</h5>
+  <form method="post" action="{{ url_for('create_user') }}" class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label">Username</label>
+      <input class="form-control" name="username" required placeholder="username" />
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Full Name</label>
+      <input class="form-control" name="full_name" placeholder="Display name" />
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Role</label>
+      <select class="form-select" name="role">
+        <option value="Admin">Admin</option>
+        <option value="Staff">Staff</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-control" name="password" required placeholder="Create password" />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Confirm Password</label>
+      <input type="password" class="form-control" name="confirm_password" required placeholder="Repeat password" />
+    </div>
+    <div class="col-12">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Create User</button>
+    </div>
+  </form>
+</div>
+
+<div class="card p-3 fade-up">
+  <h5 class="mb-3 fw-semibold"><i class="bi bi-people"></i> All Users</h5>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead>
+        <tr><th>ID</th><th>Username</th><th>Full Name</th><th>Role</th><th>Status</th><th class="text-end">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td>{{ u.username }}</td>
+          <td>{{ u.full_name }}</td>
+          <td>{{ u.role }}</td>
+          <td>
+            {% if u.is_active %}
+              <span class="badge bg-success">Active</span>
+            {% else %}
+              <span class="badge bg-secondary">Disabled</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <form method="post" action="{{ url_for('toggle_user', uid=u.id) }}" class="d-inline">
+              <button class="btn btn-sm btn-outline-secondary" type="submit">
+                {% if u.is_active %}Disable{% else %}Enable{% endif %}
+              </button>
+            </form>
+            <form method="post" action="{{ url_for('delete_user', uid=u.id) }}" class="d-inline" onsubmit="return confirm('Delete this user?');">
+              <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-muted">No users yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

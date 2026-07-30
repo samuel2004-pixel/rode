@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between">
+  <h3 class="section-title mb-0">Dashboard</h3>
+  <div class="text-muted small">{{ today | ddmmyyyy }}</div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-6 fade-up">
+    <div class="stat-card h-100">
+      <div class="stat-value">{{ total_students }}</div>
+      <div class="stat-label">Total Students</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6 fade-up">
+    <div class="stat-card gold h-100">
+      <div class="stat-value">{{ active_students }}</div>
+      <div class="stat-label">Active Students</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6 fade-up">
+    <div class="stat-card blue h-100">
+      <div class="stat-value">{{ present_today }}</div>
+      <div class="stat-label">Present Today</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6 fade-up">
+    <div class="stat-card red h-100">
+      <div class="stat-value">₹{{ '%.0f'|format(total_pending_all) }}</div>
+      <div class="stat-label">Fees Pending</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6 fade-up">
+    <div class="card p-3">
+      <h5 class="mb-3 fw-semibold"><i class="bi bi-exclamation-circle text-danger"></i> Students with Pending Fees</h5>
+      {% if pending_list %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr><th>Name</th><th>Course</th><th class="text-end">Balance (₹)</th></tr>
+          </thead>
+          <tbody>
+            {% for s, balance in pending_list %}
+            <tr>
+              <td class="d-flex align-items-center gap-2">
+                {% if s.photo_filename %}
+                <img class="student-avatar" src="{{ url_for('student_photo', filename=s.photo_filename) }}" alt="{{ s.name }}" />
+                {% else %}
+                <div class="student-avatar-placeholder">{{ (s.name or 'U')[0]|upper }}</div>
+                {% endif %}
+                <a href="{{ url_for('student_view', sid=s.id) }}">{{ s.name }}</a>
+              </td>
+              <td>{{ s.course }}</td>
+              <td class="text-end fw-bold text-danger">{{ '%.0f'|format(balance) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">No pending fee balances. 🎉</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-6 fade-up">
+    <div class="card p-3">
+      <h5 class="mb-3 fw-semibold"><i class="bi bi-person-plus"></i> Recently Registered</h5>
+      {% if recent_students %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr><th>Name</th><th>Course</th><th>Admission Date</th></tr>
+          </thead>
+          <tbody>
+            {% for s in recent_students %}
+            <tr>
+              <td class="d-flex align-items-center gap-2">
+                {% if s.photo_filename %}
+                <img class="student-avatar" src="{{ url_for('student_photo', filename=s.photo_filename) }}" alt="{{ s.name }}" />
+                {% else %}
+                <div class="student-avatar-placeholder">{{ (s.name or 'U')[0]|upper }}</div>
+                {% endif %}
+                <a href="{{ url_for('student_view', sid=s.id) }}">{{ s.name }}</a>
+              </td>
+              <td>{{ s.course }}</td>
+              <td>{{ s.admission_date | ddmmyyyy }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">No students registered yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="d-flex gap-2 mt-4 flex-wrap fade-up">
+  <a href="{{ url_for('student_add') }}" class="btn btn-primary">
+    <i class="bi bi-person-plus"></i> Register New Student
+  </a>
+  <a href="{{ url_for('attendance_page') }}" class="btn btn-secondary">
+    <i class="bi bi-calendar-check"></i> Mark Attendance <span class="text-muted small">({{ today | ddmmyyyy }})</span>
+  </a>
+  <a href="{{ url_for('fees_page') }}" class="btn btn-secondary">
+    <i class="bi bi-cash-coin"></i> Record Fee Payment
+  </a>
+</div>
+{% endblock %}

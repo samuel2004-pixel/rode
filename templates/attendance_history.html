@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Attendance History - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h3 class="section-title mb-0">Attendance History</h3>
+</div>
+
+<div class="card p-3 mb-3">
+  <h6 class="text-uppercase text-muted mb-2">Export Staff Register</h6>
+  <form class="row g-2 align-items-end" method="get" action="{{ url_for('export_attendance_pdf') }}" id="registerExportForm">
+    <div class="col-12 col-sm-6 col-md-3">
+      <label class="form-label mb-1">Month</label>
+      <select class="form-select" name="month">
+        {% for m in range(1, 13) %}
+        <option value="{{ m }}" {% if m == (start[5:7]|int if start else now_month) %}selected{% endif %}>{{ month_names[m-1] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label mb-1">Year</label>
+      <input type="number" class="form-control" name="year" value="{{ start[:4] if start else now_year }}" min="2000" max="2100">
+    </div>
+    <div class="col-12 col-sm-6 col-md-3">
+      <label class="form-label mb-1">Student</label>
+      <select class="form-select" name="student_id">
+        <option value="">All Students</option>
+        {% for s in students %}
+        <option value="{{ s.id }}" {% if student_id|string == s.id|string %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <button class="btn btn-success w-100" type="submit" formaction="{{ url_for('export_attendance_pdf') }}"><i class="bi bi-filetype-pdf"></i> PDF</button>
+    </div>
+    <div class="col-6 col-md-2">
+      <button class="btn btn-outline-secondary w-100" type="submit" formaction="{{ url_for('export_attendance_csv') }}"><i class="bi bi-filetype-csv"></i> CSV</button>
+    </div>
+  </form>
+  <small class="text-muted d-block mt-2">Exports in the centre's paper "Staff Attendance" register layout - one row per student, one column per day of the month.</small>
+</div>
+
+<div class="card p-3 mb-3">
+  <h6 class="text-uppercase text-muted mb-2">Search Records</h6>
+  <form class="row g-2" method="get">
+    <div class="col-12 col-sm-6 col-md-3">
+      <label class="form-label mb-1">Student</label>
+      <select class="form-select" name="student_id">
+        <option value="">All Students</option>
+        {% for s in students %}
+        <option value="{{ s.id }}" {% if student_id|string == s.id|string %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-3">
+      <label class="form-label mb-1">From</label>
+      <input type="date" class="form-control" name="start" value="{{ start }}" placeholder="From">
+    </div>
+    <div class="col-6 col-md-3">
+      <label class="form-label mb-1">To</label>
+      <input type="date" class="form-control" name="end" value="{{ end }}" placeholder="To">
+    </div>
+    <div class="col-12 col-md-3 d-flex align-items-end">
+      <button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-search"></i> Filter</button>
+    </div>
+  </form>
+</div>
+
+<div class="card p-2">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Date</th><th>Student</th><th>Status</th></tr></thead>
+  <tbody>
+    {% for r in records %}
+    <tr>
+      <td>{{ r.date | ddmmyyyy }}</td>
+      <td>{{ r.student_name }}</td>
+      <td><span class="badge {{ 'bg-success' if r.status=='Present' else 'bg-danger' }}">{{ r.status }}</span></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3" class="text-center text-muted py-4">No attendance records found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+
+{% endblock %}

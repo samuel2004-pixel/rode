@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Generate Certificate - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+
+<h3 class="section-title">Generate Certificate for {{ student.name }}</h3>
+
+<div class="row">
+  <div class="col-lg-6">
+    <form method="post" action="{{ url_for('issue_certificate', sid=student.id) }}" class="card p-4">
+      <div class="mb-3">
+        <label class="form-label">Name on Certificate</label>
+        <input type="text" class="form-control" name="name" value="{{ student.name }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Certificate Type</label>
+        <select class="form-select" name="duration_months">
+          <option value="3" {% if student.duration_months==3 %}selected{% endif %}>3 Months Diploma</option>
+          <option value="6" {% if student.duration_months==6 %}selected{% endif %}>6 Months Diploma</option>
+          <option value="12" {% if student.duration_months==12 %}selected{% endif %}>1 Year Diploma</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Course Start Date</label>
+        <input type="date" class="form-control" name="start_date" value="{{ student.start_date }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Course End Date</label>
+        <input type="date" class="form-control" name="end_date" value="{{ student.end_date }}">
+      </div>
+      <button type="submit" class="btn btn-gold"><i class="bi bi-download"></i> Generate &amp; Download PDF Certificate</button>
+      <a href="{{ url_for('student_view', sid=student.id) }}" class="btn btn-outline-secondary mt-2">Back to Profile</a>
+    </form>
+  </div>
+  <div class="col-lg-6">
+    <div class="card p-4">
+      <h6 class="text-uppercase text-muted">About certificate generation</h6>
+      <p class="text-muted small mb-0">
+        This fills the centre's official "Diploma in Tailoring" certificate
+        template (3-month, 6-month, or 1-year version) with the student's name and
+        course dates, and produces a ready-to-print PDF. Every certificate
+        generated is also logged on the student's profile for record-keeping.
+      </p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

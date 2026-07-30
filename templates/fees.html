@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Fees - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h3 class="section-title mb-0">Monthly Fees</h3>
+  <a href="{{ url_for('fees_history') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-clock-history"></i> View History / Export</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card p-3">
+      <h6 class="text-uppercase text-muted">Record a Fee Payment</h6>
+      <form method="post">
+        <div class="mb-3">
+          <label class="form-label">Student *</label>
+          <select class="form-select" name="student_id" required>
+            <option value="">Select student</option>
+            {% for s in students %}
+            <option value="{{ s.id }}">{{ s.name }} - {{ s.course }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Month *</label>
+          <input type="month" class="form-control" name="month" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Amount Paid (₹) *</label>
+          <input type="number" step="0.01" class="form-control" name="amount_paid" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Payment Date</label>
+          <input type="date" class="form-control" name="payment_date" value="{{ today }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Mode of Payment</label>
+          <select class="form-select" name="mode">
+            <option value="Cash">Cash</option>
+            <option value="UPI">UPI</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Cheque">Cheque</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Remarks</label>
+          <input type="text" class="form-control" name="remarks">
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Save Payment</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card p-3">
+      <h6 class="text-uppercase text-muted">Recent Payments</h6>
+      <div class="table-responsive">
+      <table class="table table-sm">
+        <thead><tr><th>Student</th><th>Month</th><th>Amount</th><th>Date</th><th>Mode</th><th></th></tr></thead>
+        <tbody>
+          {% for f in recent %}
+          <tr>
+            <td>{{ f.student_name }}</td>
+            <td>{{ f.month }}</td>
+            <td>₹{{ '%.0f'|format(f.amount_paid) }}</td>
+            <td>{{ f.payment_date | ddmmyyyy }}</td>
+            <td>{{ f.mode }}</td>
+            <td>
+              <form method="post" action="{{ url_for('fee_delete', fid=f.id) }}"
+                    onsubmit="return confirm('Delete this fee entry?');">
+                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-muted text-center py-3">No fee payments recorded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

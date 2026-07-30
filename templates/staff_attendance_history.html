@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Staff Attendance History - YWAM Tailoring Centre{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h3 class="section-title mb-0">Staff Attendance History</h3>
+  <a href="{{ url_for('staff_attendance_page') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-calendar-check"></i> Back to Mark Attendance</a>
+</div>
+
+<div class="card p-3 mb-3">
+  <h6 class="text-uppercase text-muted mb-2">Search Records</h6>
+  <form class="row g-2" method="get">
+    <div class="col-12 col-sm-6 col-md-3">
+      <label class="form-label mb-1">Staff</label>
+      <select class="form-select" name="staff_id">
+        <option value="">All Staff</option>
+        {% for u in staff %}
+        <option value="{{ u.id }}" {% if staff_id|string == u.id|string %}selected{% endif %}>{{ u.full_name or u.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-3">
+      <label class="form-label mb-1">From</label>
+      <input type="date" class="form-control" name="start" value="{{ start }}" placeholder="From">
+    </div>
+    <div class="col-6 col-md-3">
+      <label class="form-label mb-1">To</label>
+      <input type="date" class="form-control" name="end" value="{{ end }}" placeholder="To">
+    </div>
+    <div class="col-12 col-md-3 d-flex align-items-end">
+      <button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-search"></i> Filter</button>
+    </div>
+  </form>
+</div>
+
+<div class="card p-2">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Date</th><th>Staff</th><th>Status</th></tr></thead>
+  <tbody>
+    {% for r in records %}
+    <tr>
+      <td>{{ r.date | ddmmyyyy }}</td>
+      <td>{{ r.full_name or r.username }}</td>
+      <td><span class="badge {{ 'bg-success' if r.status=='Present' else 'bg-danger' }}">{{ r.status }}</span></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3" class="text-center text-muted py-4">No attendance records found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+
+{% endblock %}
